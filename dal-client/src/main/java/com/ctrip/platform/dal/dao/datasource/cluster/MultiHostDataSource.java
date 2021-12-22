@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
@@ -99,9 +100,14 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
                 config.setHost(host);
                 DataSourceConfigure cloneConfig = config.clone();
                 cloneConfig.setValidator(validatingConnValidator);
+                customizedValidatingConfig(cloneConfig);
                 validatingConnDataSources.put(host, prepareDataSource(cloneConfig));
             });
         }
+    }
+
+    private void customizedValidatingConfig(DataSourceConfigure configure) {
+        configure.setProperty(DataSourceConfigureConstants.MINIDLE, "4");
     }
 
     protected SingleDataSource prepareDataSource(DataSourceConfigure dataSourceConfig) {

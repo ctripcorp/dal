@@ -4,6 +4,7 @@ import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -80,7 +81,7 @@ public class MultiHostDataSourceTest {
         return new MultiHostClusterProperties() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return new MGRStrategy();
             }
 
             @Override
@@ -95,9 +96,26 @@ public class MultiHostDataSourceTest {
 
             @Override
             public CaseInsensitiveProperties routeStrategyProperties() {
-                return null;
+                return mockCaseInsensitiveProperties();
             }
         };
+    }
+
+    private CaseInsensitiveProperties mockCaseInsensitiveProperties(Map<String, String> properties) {
+        return new CaseInsensitiveProperties(properties);
+    }
+
+    private CaseInsensitiveProperties mockCaseInsensitiveProperties() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("zonesPriority", "zone1,zone2,zone3");
+        return mockCaseInsensitiveProperties(properties);
+    }
+
+    @Test
+    public void testMGRModel() throws SQLException {
+        MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
+                mockClusterProperties(), "zone1");
+        Connection connection = dataSource.getConnection();
     }
 
 }

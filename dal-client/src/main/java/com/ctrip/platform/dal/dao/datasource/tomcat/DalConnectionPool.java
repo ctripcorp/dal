@@ -59,7 +59,7 @@ public class DalConnectionPool extends ConnectionPool {
         PooledConnection pooledConnection = super.borrowConnection(now, con, username, password);
         if (con.getLastConnected() > now) {
             connectionListener.onRecreateConnection(getName(), getConnection(con));
-            preHandleConnection(pooledConnection);
+            preHandleConnection(pooledConnection, false);
         }
         return pooledConnection;
     }
@@ -88,7 +88,7 @@ public class DalConnectionPool extends ConnectionPool {
             logger.error("[createConnection]" + this, e);
         }
 
-        preHandleConnection(pooledConnection);
+        preHandleConnection(pooledConnection, true);
 
         return pooledConnection;
     }
@@ -142,10 +142,11 @@ public class DalConnectionPool extends ConnectionPool {
         return con == null ? null : con.getConnection();
     }
 
-    private void preHandleConnection(PooledConnection conn) {
+    private void preHandleConnection(PooledConnection conn, boolean needValidate) {
         Connection connection = getConnection(conn);
         if (connection != null) {
-            tryValidateClusterConnection(conn);
+            if (needValidate)
+                tryValidateClusterConnection(conn);
             trySetSessionWaitTimeout(connection);
         }
     }

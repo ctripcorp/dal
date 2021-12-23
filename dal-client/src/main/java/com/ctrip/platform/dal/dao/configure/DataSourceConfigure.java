@@ -373,8 +373,22 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         dataSourceConfigure.setVersion(version);
         dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
         dataSourceConfigure.setDataSourceId(dataSourceId);
+//        dataSourceConfigure.setHost(host);
+//        dataSourceConfigure.setValidator(validator);
+        return dataSourceConfigure;
+    }
+
+    public synchronized DataSourceConfigure cloneWithoutValidator() {
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure(name);
+        Properties p = new Properties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            p.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        }
+        dataSourceConfigure.setProperties(p);
+        dataSourceConfigure.setVersion(version);
+        dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
+        dataSourceConfigure.setDataSourceId(dataSourceId);
         dataSourceConfigure.setHost(host);
-        dataSourceConfigure.setValidator(validator);
         return dataSourceConfigure;
     }
 

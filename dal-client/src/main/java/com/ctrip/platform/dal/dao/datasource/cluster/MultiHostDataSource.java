@@ -98,7 +98,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         if (validatingConnValidator != null) {
             dataSourceConfigs.forEach((host, config) -> {
                 config.setHost(host);
-                DataSourceConfigure cloneConfig = config.clone();
+                DataSourceConfigure cloneConfig = config.cloneWithoutValidator();
                 cloneConfig.setValidator(validatingConnValidator);
                 customizedValidatingConfig(cloneConfig);
                 validatingConnDataSources.put(host, prepareDataSource(cloneConfig));

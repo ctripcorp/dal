@@ -168,6 +168,10 @@ public abstract class AbstractHostValidator implements HostValidator {
         return connectionFactory.getPooledConnectionForHost(host);
     }
 
+    protected Connection getValidatedConnection(HostSpec hostSpec) throws SQLException {
+        return connectionFactory.getPooledConnectionForValidate(hostSpec);
+    }
+
     private boolean isDestroy() {
         return RouteStrategyStatus.destroy.equals(status);
     }

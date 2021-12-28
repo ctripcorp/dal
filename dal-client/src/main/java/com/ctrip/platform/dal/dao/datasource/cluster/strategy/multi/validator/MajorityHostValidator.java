@@ -137,7 +137,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
         for (HostSpec hostSpec : configuredHosts) {
             if (!currentHostSpec.equals(hostSpec)) {
                 Future future = doubleCheckService.submit(() -> {
-                    try (Connection connection = connectionFactory.getPooledConnectionForValidate(hostSpec)){
+                    try (Connection connection = getValidatedConnection(hostSpec)){
                         boolean result = doubleCheckValidate(connection, currentMemberId);
                         if (result)
                             onlineCount.incrementAndGet();
@@ -173,7 +173,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
 
     @Override
     protected void doAsyncValidate(HostSpec host) {
-        try (Connection connection = connectionFactory.getPooledConnectionForValidate(host)){
+        try (Connection connection = getValidatedConnection(host)){
             ValidateResult validateResult = validateAndUpdate(connection, host, configuredHosts.size());
             LOGGER.info(ASYNC_VALIDATE_RESULT + validateResult);
         }catch (Throwable e) {

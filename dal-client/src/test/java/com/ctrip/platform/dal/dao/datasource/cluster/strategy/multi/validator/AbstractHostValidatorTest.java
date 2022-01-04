@@ -43,6 +43,11 @@ public abstract class AbstractHostValidatorTest {
             public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
                 return new CustomConnection();
             }
+
+            @Override
+            public Connection getPooledConnectionForValidate(HostSpec host) throws SQLException {
+                return null;
+            }
         };
     }
 }

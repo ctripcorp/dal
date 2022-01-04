@@ -62,4 +62,9 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
     protected Connection getConnection(HostSpec host) throws SQLException {
         return connectionMap.get(host);
     }
+
+    @Override
+    protected Connection getValidatedConnection(HostSpec host) throws SQLException{
+        return connectionMap.get(host);
+    }
 }

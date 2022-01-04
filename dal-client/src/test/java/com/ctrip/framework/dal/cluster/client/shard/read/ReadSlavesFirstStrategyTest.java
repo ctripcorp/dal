@@ -52,7 +52,7 @@ public class ReadSlavesFirstStrategyTest {
         ReadMasterStrategy readMasterStrategy = new ReadMasterStrategy();
         readMasterStrategy.init(set, null);
         DalHints dalHints2 = new DalHints().slaveOnly();
-        assertEquals(false, readMasterStrategy.hintsRoute(dalHints2).isMaster());
+        assertNull(readMasterStrategy.hintsRoute(dalHints2));
     }
 
     @Test

@@ -165,11 +165,13 @@ public class DalStatement implements Statement {
 
     @Override
     public void clearBatch() throws SQLException {
+        clearLogParameters();
         statement.clearBatch();
     }
 
     @Override
     public int[] executeBatch() throws SQLException {
+        clearLogParameters();
         return executeStatement(() -> statement.executeBatch(), true);
     }
 
@@ -386,6 +388,14 @@ public class DalStatement implements Statement {
 
     protected boolean isUpdateOperation(String sql) {
         return !SqlUtils.isReadOperation(sql);
+    }
+
+    protected void clearLogParam() {
+        this.logParameters = null;
+    }
+
+    protected void clearLogParameters() {
+        this.batchStatementParameters.clear();
     }
 
 }

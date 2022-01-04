@@ -148,6 +148,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public void clearParameters() throws SQLException {
+        clearLogParam();
         preparedStatement.clearParameters();
     }
 

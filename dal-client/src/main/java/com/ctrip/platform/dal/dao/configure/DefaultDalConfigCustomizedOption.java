@@ -12,6 +12,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
+    private String delegate;
+    private String jdbcDriver;
     private String tag = "";
     private boolean queryConsistent;
 
@@ -48,6 +50,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    public String getDataSourceFactory() {
+        return delegate;
+    }
+
+    @Override
+    public String getJdbcDriver() {
+        return jdbcDriver;
     }
 
     @Override
@@ -90,6 +102,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption delegate(String clazz) {
+        this.delegate = clazz;
+        return this;
+    }
+
+    public DefaultDalConfigCustomizedOption jdbcDriver(String jdbcDriver) {
+        this.jdbcDriver = jdbcDriver;
+        return this;
+    }
+
     public DefaultDalConfigCustomizedOption queryConsistent(boolean queryConsistent) {
         this.queryConsistent = queryConsistent;
         return this;
@@ -98,13 +120,15 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
-                .databaseRole(this.getDatabaseRole())
-                .shardIndex(this.getShardIndex())
-                .forceInitialize(this.isForceInitialize())
-                .ignoreShardingResourceNotFound(this.isIgnoreShardingResourceNotFound())
-                .consistencyTypeCustomizedClass(this.getConsistencyTypeCustomizedClass())
-                .readStrategy(this.getRouteStrategy())
-                .tag(this.getTag())
+                .databaseRole(this.databaseRole)
+                .shardIndex(this.shardIndex)
+                .forceInitialize(this.forceInitialize)
+                .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
+                .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
+                .readStrategy(this.readStrategy)
+                .tag(this.tag)
+                .delegate(this.delegate)
+                .jdbcDriver(this.jdbcDriver)
                 .queryConsistent(this.isQueryConsistent());
     }
 }

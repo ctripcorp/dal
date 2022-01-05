@@ -27,7 +27,7 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity, IClusterDa
         init();
     }
 
-    private void init() {
+    protected void init() {
         String role = database.isMaster() ? MASTER : SLAVE;
         ConnectionString connString = database.getConnectionString();
         id = String.format(ID_FORMAT, database.getClusterName(), database.getShardIndex(), role,

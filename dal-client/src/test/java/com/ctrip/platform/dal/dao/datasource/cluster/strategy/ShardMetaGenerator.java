@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.junit.Before;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -69,6 +70,11 @@ public abstract class ShardMetaGenerator {
         @Override
         public Connection getPooledConnectionForHost(HostSpec host) throws InvalidConnectionException {
             return new CustomConnection();
+        }
+
+        @Override
+        public Connection getPooledConnectionForValidate(HostSpec host) throws SQLException {
+            return null;
         }
     };
 

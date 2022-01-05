@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
@@ -10,10 +11,12 @@ import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ConnectionFactoryAware;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ValidatingConnectionValidatorHolder;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -35,10 +38,12 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final ShardMeta shardMeta;
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
+    private final Map<HostSpec, SingleDataSource> validatingConnDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
     private final RouteStrategy routeStrategy;
     private final MultiHostClusterProperties clusterProperties;
     private HostConnectionValidator connValidator;
+    private HostConnectionValidator validatingConnValidator;
 
     private final AtomicBoolean isDetecting = new AtomicBoolean(false);
     private final AtomicLong lastDetectedTime = new AtomicLong(0);
@@ -54,7 +59,17 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     protected ConnectionFactory prepareConnectionFactory() {
-        return host -> wrappedDataSources.get(host).getDataSource().getConnection();
+        return new ConnectionFactory() {
+            @Override
+            public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
+                return wrappedDataSources.get(host).getDataSource().getConnection();
+            }
+
+            @Override
+            public Connection getPooledConnectionForValidate(HostSpec host) throws SQLException {
+                return validatingConnDataSources.get(host).getDataSource().getConnection();
+            }
+        };
     }
 
     protected RouteStrategy prepareRouteStrategy() {
@@ -67,6 +82,9 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         if (strategy instanceof HostConnectionValidatorHolder) {
             this.connValidator = ((HostConnectionValidatorHolder) strategy).getHostConnectionValidator();
         }
+        if (strategy instanceof ValidatingConnectionValidatorHolder) {
+            this.validatingConnValidator = ((ValidatingConnectionValidatorHolder) strategy).getValidatingConnectionValidator();
+        }
         return strategy;
     }
 
@@ -76,6 +94,20 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
             config.setValidator(connValidator);
             wrappedDataSources.put(host, prepareDataSource(config));
         });
+
+        if (validatingConnValidator != null) {
+            dataSourceConfigs.forEach((host, config) -> {
+                config.setHost(host);
+                DataSourceConfigure cloneConfig = config.cloneWithoutValidator();
+                cloneConfig.setValidator(validatingConnValidator);
+                customizedValidatingConfig(cloneConfig);
+                validatingConnDataSources.put(host, prepareDataSource(cloneConfig));
+            });
+        }
+    }
+
+    private void customizedValidatingConfig(DataSourceConfigure configure) {
+        configure.setProperty(DataSourceConfigureConstants.MINIDLE, "4");
     }
 
     protected SingleDataSource prepareDataSource(DataSourceConfigure dataSourceConfig) {

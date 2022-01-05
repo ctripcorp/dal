@@ -35,8 +35,8 @@ public abstract class AbstractHostValidator implements HostValidator {
     private volatile ScheduledExecutorService fixedPeriodValidateService;
     private volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
     private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
-    private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
-    private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
+    protected static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
+    protected static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
     protected Long ONE_SECOND = 900L; // 100ms threshold to tolerant schedule time fault
 
     private enum RouteStrategyStatus {
@@ -166,6 +166,10 @@ public abstract class AbstractHostValidator implements HostValidator {
 
     protected Connection getConnection(HostSpec host) throws SQLException {
         return connectionFactory.getPooledConnectionForHost(host);
+    }
+
+    protected Connection getValidatedConnection(HostSpec hostSpec) throws SQLException {
+        return connectionFactory.getPooledConnectionForValidate(hostSpec);
     }
 
     private boolean isDestroy() {

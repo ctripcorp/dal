@@ -16,6 +16,7 @@ import java.util.Map;
 public class LogUtils {
 
     private static LogFilter logFilter;
+    private static boolean ignoreParamsEncryptGlobal = false;
 
     static {
         try {
@@ -54,6 +55,14 @@ public class LogUtils {
         getLogContext().setHasLogged(hasLogged);
     }
 
+    public static void setDatabase(String database) {
+        logContext.get().setDatabase(database);
+    }
+
+    public static String getDatabase() {
+        return logContext.get().getDatabase();
+    }
+
     public static void clearLogContext() {
         logContext.get().clear();
     }
@@ -85,4 +94,19 @@ public class LogUtils {
         return logFilter.filter(throwable);
     }
 
+    public static void ignoreParamsEncryptInSqlContext(){
+        logContext.get().setParamsEncryptInSqlContext(false);
+    }
+
+    public static void ignoreParamsEncryptGlobal(){
+        ignoreParamsEncryptGlobal = true;
+    }
+
+    public static void encryptParamsGlobal(){
+        ignoreParamsEncryptGlobal = false;
+    }
+
+    public static boolean shouldIgnoreParamsEncryptGlobal(){
+        return ignoreParamsEncryptGlobal;
+    }
 }

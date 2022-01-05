@@ -69,6 +69,16 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
                 }
 
                 @Override
+                public String getDataSourceFactory() {
+                    return null;
+                }
+
+                @Override
+                public String getJdbcDriver() {
+                    return null;
+                }
+
+                @Override
                 public boolean isQueryConsistent() {
                     return false;
                 }

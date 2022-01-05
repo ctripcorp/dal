@@ -6,11 +6,13 @@ import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.datasource.cluster.ZonedHostSorter;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ValidatingConnectionValidatorHolder;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.AbstractMultiMasterStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.MajorityHostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.NullConnectionValidator;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +21,7 @@ import java.util.Set;
  * @Author limingdong
  * @create 2021/8/25
  */
-public class MGRStrategy extends AbstractMultiMasterStrategy implements MultiMasterStrategy, HostConnectionValidatorHolder {
+public class MGRStrategy extends AbstractMultiMasterStrategy implements MultiMasterStrategy, HostConnectionValidatorHolder, ValidatingConnectionValidatorHolder {
 
     private static final String CONNECTION_HOST_CHANGE = "Router::connectionHostChange:%s";
 
@@ -73,4 +75,8 @@ public class MGRStrategy extends AbstractMultiMasterStrategy implements MultiMas
         return hostValidator;
     }
 
+    @Override
+    public HostConnectionValidator getValidatingConnectionValidator() {
+        return new NullConnectionValidator();
+    }
 }

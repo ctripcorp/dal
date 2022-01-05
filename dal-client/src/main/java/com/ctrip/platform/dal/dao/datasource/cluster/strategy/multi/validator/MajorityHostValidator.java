@@ -21,15 +21,13 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
     private static final String VALIDATE_ERROR = "Validator::validateError";
     private static final String VALIDATE_RESULT = "Validator::validateResult:";
-    private static final String ASYNC_VALIDATE_RESULT = "Validator::asyncValidateResult:";
     private static final String VALIDATE_RESULT_DETAIL ="Validator::validateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
     private static final String DOUBLE_CHECK_VALIDATE_RESULT_DETAIL ="Validator::doubleCheckValidateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
     private static final String CREATE_CONNECTION_FAILED = "Router::createConnectionFailed";
 
     private static ValidateResult defaultValidateResult = new ValidateResult();
     private static volatile ExecutorService doubleCheckService = Executors.newFixedThreadPool(2);
-    private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
-    private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
+    private static volatile ExecutorService removeBlackListService = Executors.newFixedThreadPool(8);
     private static final String validateSQL1 = "select members.MEMBER_STATE MEMBER_STATE, " +
             "members.MEMBER_ID MEMBER_ID, " +
             "member_stats.MEMBER_ID CURRENT_MEMBER_ID " +
@@ -78,7 +76,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
 
     @Override
     protected String getCatLogType() {
-        return "Dal.MGR";
+        return "DAL.MGR";
     }
 
     @Override
@@ -112,10 +110,13 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
             ValidateResult validateResult = validate(connection, clusterHostCount);
             if (validateResult.validateResult) {
                 // memberId is not empty and this host is in list and another host think it is online
-                if (!StringUtils.isEmpty(validateResult.currentMemberId) &&
-                        (preBlackList.containsKey(currentHost) || hostBlackList.containsKey(currentHost)) &&
-                        doubleCheckOnlineStatus(validateResult.currentMemberId, currentHost))
-                    removeFromAllBlackList(currentHost);
+                removeBlackListService.submit(() -> {
+                    if (!StringUtils.isEmpty(validateResult.currentMemberId) &&
+                            (preBlackList.containsKey(currentHost) || hostBlackList.containsKey(currentHost)) &&
+                            doubleCheckOnlineStatus(validateResult.currentMemberId, currentHost))
+                        removeFromAllBlackList(currentHost);
+                });
+
             } else {
                 addToBlackAndRemoveFromPre(currentHost);
             }
@@ -136,7 +137,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
         for (HostSpec hostSpec : configuredHosts) {
             if (!currentHostSpec.equals(hostSpec)) {
                 Future future = doubleCheckService.submit(() -> {
-                    try (Connection connection = getConnection(hostSpec)){
+                    try (Connection connection = getValidatedConnection(hostSpec)){
                         boolean result = doubleCheckValidate(connection, currentMemberId);
                         if (result)
                             onlineCount.incrementAndGet();
@@ -172,7 +173,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
 
     @Override
     protected void doAsyncValidate(HostSpec host) {
-        try (Connection connection = getConnection(host)){
+        try (Connection connection = getValidatedConnection(host)){
             ValidateResult validateResult = validateAndUpdate(connection, host, configuredHosts.size());
             LOGGER.info(ASYNC_VALIDATE_RESULT + validateResult);
         }catch (Throwable e) {

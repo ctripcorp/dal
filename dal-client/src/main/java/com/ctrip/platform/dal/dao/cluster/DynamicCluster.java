@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -134,6 +135,11 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     @Override
     public DalConfigCustomizedOption getCustomizedOption() {
         return getInnerCluster().getCustomizedOption();
+    }
+
+    @Override
+    public Properties getCustomProperties() {
+        return getInnerCluster().getCustomProperties();
     }
 
     private void registerListener() {

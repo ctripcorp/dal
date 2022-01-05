@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.base.MockConnectionAction;
 import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class DalTransactionManagerTest {
 			assertFalse(DalTransactionManager.isInTransaction());
 			ConnectionAction<?> action = new ConnectionAction<Object>() {
 				public Object execute() throws Exception {
-					Assert.assertNotNull(test.getConnection(hints, DalEventEnum.BATCH_CALL));
+					Assert.assertNotNull(test.getConnection(hints, new MockConnectionAction(DalEventEnum.BATCH_CALL)));
 					return null;
 				}
 			};

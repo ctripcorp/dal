@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+		OrderedComparatorTest.class,
 		DalFirstResultMergerTest.class,
 		DalSingleResultMergerTest.class,
 		PartialQueryTableDaoUnitTest.class,

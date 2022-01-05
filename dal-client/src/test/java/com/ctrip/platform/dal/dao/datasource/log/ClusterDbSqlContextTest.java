@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -180,6 +181,11 @@ public class ClusterDbSqlContextTest extends BaseSqlContextTest {
 
             @Override
             public DalConfigCustomizedOption getCustomizedOption() {
+                return null;
+            }
+
+            @Override
+            public Properties getCustomProperties() {
                 return null;
             }
 

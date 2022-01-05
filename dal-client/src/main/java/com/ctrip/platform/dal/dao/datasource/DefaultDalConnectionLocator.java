@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
@@ -50,14 +51,40 @@ public class DefaultDalConnectionLocator extends InjectableComponentSupport impl
 
     @Override
     public Connection getConnection(String name) throws Exception {
+        return getConnection(name, null);
+    }
+
+    @Override
+    public Connection getConnection(String name, ConnectionAction action) throws Exception {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         DataSource dataSource = locator.getDataSource(keyName);
+        logConnectionUrl(dataSource, action);
         return dataSource.getConnection();
+    }
+
+    // in case we can't log sql.database if there is exception while create a connection
+    private void logConnectionUrl(DataSource dataSource, ConnectionAction action) {
+        try{
+            if (dataSource instanceof SingleDataSourceWrapper) {
+                SingleDataSource singleDataSource = ((SingleDataSourceWrapper) dataSource).getSingleDataSource();
+                if (singleDataSource != null) {
+                    action.entry.setDbUrl(singleDataSource.getDataSourceConfigure().getConnectionUrl());
+                }
+            }
+        } catch (Throwable t) {
+            // no need to do
+        }
     }
 
     @Override
     public Connection getConnection(DataSourceIdentity id) throws Exception {
+        return getConnection(id, null);
+    }
+
+    @Override
+    public Connection getConnection(DataSourceIdentity id, ConnectionAction action) throws Exception {
         DataSource dataSource = locator.getDataSource(id);
+        logConnectionUrl(dataSource, action);
         return dataSource.getConnection();
     }
 

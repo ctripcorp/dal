@@ -42,5 +42,9 @@ public interface DalConfigCustomizedOption {
 
     String getTag();
 
+    String getDataSourceFactory();
+
+    String getJdbcDriver();
+
     boolean isQueryConsistent();
 }

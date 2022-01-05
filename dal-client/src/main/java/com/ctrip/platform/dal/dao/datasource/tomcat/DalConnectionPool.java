@@ -59,7 +59,7 @@ public class DalConnectionPool extends ConnectionPool {
         PooledConnection pooledConnection = super.borrowConnection(now, con, username, password);
         if (con.getLastConnected() > now) {
             connectionListener.onRecreateConnection(getName(), getConnection(con));
-            preHandleConnection(pooledConnection);
+            preHandleConnection(pooledConnection, false);
         }
         return pooledConnection;
     }
@@ -88,9 +88,27 @@ public class DalConnectionPool extends ConnectionPool {
             logger.error("[createConnection]" + this, e);
         }
 
-        preHandleConnection(pooledConnection);
+        preHandleConnection(pooledConnection, true);
 
         return pooledConnection;
+    }
+
+    @Override
+    protected void returnConnection(PooledConnection con) {
+        try {
+            if (con.getConnection().isClosed() && !con.isDiscarded()) {
+                con.setDiscarded(true);
+                String poolUrl = con.getPoolProperties().getUrl();
+                String connUrl = ConnectionUtils.getConnectionUrl(con.getConnection(), poolUrl);
+                String logName = String.format("Connection::discardConnection:%s", connUrl);
+                logger.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, poolUrl, System.currentTimeMillis());
+                logger.warn(String.format("Connection marked discarded: %s", connUrl));
+            }
+        } catch (SQLException e) {
+            logger.error("[returnConnection]" + this, e);
+        }
+
+        super.returnConnection(con);
     }
 
     @Override
@@ -124,10 +142,11 @@ public class DalConnectionPool extends ConnectionPool {
         return con == null ? null : con.getConnection();
     }
 
-    private void preHandleConnection(PooledConnection conn) {
+    private void preHandleConnection(PooledConnection conn, boolean needValidate) {
         Connection connection = getConnection(conn);
         if (connection != null) {
-            tryValidateClusterConnection(conn);
+            if (needValidate)
+                tryValidateClusterConnection(conn);
             trySetSessionWaitTimeout(connection);
         }
     }

@@ -22,7 +22,7 @@ public class DalConnectionPoolTest {
     public void testValidation() throws Exception {
         DataSourceConfigure config = new DataSourceConfigure("test");
         config.setDriverClass("com.mysql.jdbc.Driver");
-        config.setConnectionUrl("jdbc:mysql://10.32.20.116:3306/llj_test");
+        config.setConnectionUrl("jdbc:mysql://10.32.20.117:3306/llj_test");
         config.setUserName("root");
         config.setPassword("!QAZ@WSX1qaz2wsx");
         config.setProperty(DataSourceConfigureConstants.VALIDATORCLASSNAME, "com.ctrip.platform.dal.dao.datasource.tomcat.MockValidator");

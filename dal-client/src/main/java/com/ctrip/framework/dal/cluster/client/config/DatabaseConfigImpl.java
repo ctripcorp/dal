@@ -1,9 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.database.MySqlDatabase;
+import com.ctrip.framework.dal.cluster.client.database.*;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 
@@ -41,6 +38,8 @@ public class DatabaseConfigImpl implements DatabaseConfig {
             throw new ClusterConfigException("undefined database category");
         else if (databaseCategory == DatabaseCategory.MYSQL)
             return new MySqlDatabase(this);
+        else if (databaseCategory == DatabaseCategory.CUSTOM)
+            return new DummyDatabase(this);
         else
             throw new ClusterConfigException(String.format("unsupported database category: %s", databaseCategory.getValue()));
     }

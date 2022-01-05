@@ -30,6 +30,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     private LocalizationConfig localizationConfig;
     private LocalizationConfig lastLocalizationConfig;
     private DalConfigCustomizedOption customizedOption;
+    private Properties customProperties;
 
     public DefaultCluster(ClusterConfigImpl clusterConfig) {
         this.clusterConfig = clusterConfig;
@@ -140,8 +141,17 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
         return databaseShards.get(shardIndex);
     }
 
+    @Override
+    public Properties getCustomProperties() {
+        return customProperties;
+    }
+
     public void setCustomizedOption(DalConfigCustomizedOption customizedOption) {
         this.customizedOption = customizedOption;
+    }
+
+    public void setCustomProperties(Properties customProperties) {
+        this.customProperties = customProperties;
     }
 
     public void setLastLocalizationConfig(LocalizationConfig lastConfig) {

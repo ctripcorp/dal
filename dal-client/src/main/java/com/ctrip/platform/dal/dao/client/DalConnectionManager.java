@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -9,7 +8,6 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -48,7 +46,7 @@ public class DalConnectionManager {
 		return logger;
 	}
 
-	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
+	public DalConnection getNewConnection(DalHints hints, boolean useMaster, ConnectionAction action)
 			throws SQLException {
 		DalConnection connHolder = null;
 		String realDbName = logicDbName;
@@ -58,9 +56,9 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.MarkdownLogicDb, logicDbName);
 
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
-			boolean isSelect = operation == DalEventEnum.QUERY;
+			boolean isSelect = action.operation == DalEventEnum.QUERY;
 
-			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
+			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect, action);
 
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
@@ -102,7 +100,7 @@ public class DalConnectionManager {
 	}
 
 	private DalConnection getConnectionFromDSLocator(DalHints hints,
-													 boolean isMaster, boolean isSelect) throws SQLException {
+													 boolean isMaster, boolean isSelect, ConnectionAction action) throws SQLException {
 		Connection conn;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		String shardId = null;
@@ -126,19 +124,19 @@ public class DalConnectionManager {
 			DbMeta meta;
 			if (selectedDataBase instanceof ClusterDataBase) {
 				ClusterDataBase clusterDataBase = (ClusterDataBase) selectedDataBase;
-				conn = locator.getConnection(clusterDataBase);
+				conn = locator.getConnection(clusterDataBase, action);
 				meta = DbMeta.createIfAbsent(clusterDataBase, dbSet.getDatabaseCategory(), conn);
 				if (shardId == null)
-					shardId = String.valueOf(clusterDataBase.getDatabase().getShardIndex());
+					shardId = clusterDataBase.getSharding();
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
 				DataSourceIdentity id = selectedDataBase.getDataSourceIdentity();
-				conn = locator.getConnection(id);
+				conn = locator.getConnection(id, action);
 				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
 			}
 			else {
 				String allInOneKey = selectedDataBase.getConnectionString();
-				conn = locator.getConnection(allInOneKey);
+				conn = locator.getConnection(allInOneKey, action);
 				meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
 			}
 			return new DalConnection(conn, selectedDataBase.isMaster(), shardId, meta);
@@ -150,6 +148,8 @@ public class DalConnectionManager {
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
 		if (dbSet instanceof ClusterDatabaseSet && !((ClusterDatabaseSet) dbSet).getCluster().getRouteStrategyConfig().multiMaster()) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
+		} else if (dbSet instanceof ClusterDatabaseSet && ((ClusterDatabaseSet) dbSet).getCluster().getRouteStrategyConfig().multiMaster()) {
+			return new ClusterDataBaseAdapter(((ClusterDatabaseSet) dbSet).getCluster());
 		}
 
 		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);

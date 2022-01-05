@@ -154,12 +154,8 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
         properties.setProperty("connectionUrl", oracleUrl);
         Assert.assertEquals(DatabaseCategory.Oracle, dataSourceConfigure.getDatabaseCategory());
         properties.setProperty("connectionUrl", nonstandardUrl);
-        try {
-            dataSourceConfigure.getDatabaseCategory();
-            Assert.fail();
-        } catch (RuntimeException e) {
+        Assert.assertEquals(DatabaseCategory.Custom, dataSourceConfigure.getDatabaseCategory());
 
-        }
         properties.setProperty("connectionUrl", nullUrl);
         try {
             dataSourceConfigure.getDatabaseCategory();

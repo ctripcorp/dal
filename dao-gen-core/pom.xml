@@ -20,7 +20,7 @@
         <commons-io-version>2.5</commons-io-version>
         <jcl-over-slf4j>1.7.21</jcl-over-slf4j>
         <logback-version>1.2.2</logback-version>
-        <fastjson-version>1.2.60</fastjson-version>
+        <fastjson-version>1.2.83</fastjson-version>
         <jackson-version>2.9.9</jackson-version>
         <jsqlparser-version>1.2</jsqlparser-version>
         <junit-version>4.12</junit-version>

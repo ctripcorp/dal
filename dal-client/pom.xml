@@ -14,7 +14,7 @@
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
         <sqljdbc-version>6.4.0.jre7.ctrip</sqljdbc-version>
-        <mysql-connector-version>5.1.38</mysql-connector-version>
+        <mysql-connector-version>8.0.28</mysql-connector-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
         <dal-common-version>1.1.4</dal-common-version>
         <javax.servlet-api-version>3.1-b09</javax.servlet-api-version>

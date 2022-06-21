@@ -15,7 +15,7 @@
         <jersey-version>2.25.1</jersey-version>
         <guava-version>21.0</guava-version>
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
-        <mysql-connector-version>5.1.41</mysql-connector-version>
+        <mysql-connector-version>8.0.28</mysql-connector-version>
         <commons-email-version>1.4</commons-email-version>
         <commons-io-version>2.5</commons-io-version>
         <jcl-over-slf4j>1.7.21</jcl-over-slf4j>

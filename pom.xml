@@ -51,7 +51,7 @@
         <guava.version>21.0</guava.version>
         <commons-email.version>1.4</commons-email.version>
         <commons-io.version>2.5</commons-io.version>
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.12.6.1</jackson.version>
         <poi.version>3.16</poi.version>
         <dom4j.version>2.1.1</dom4j.version>
         <velocity.version>1.7</velocity.version>

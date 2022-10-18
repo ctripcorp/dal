@@ -21,7 +21,7 @@
         <jcl-over-slf4j>1.7.21</jcl-over-slf4j>
         <logback-version>1.2.2</logback-version>
         <fastjson-version>1.2.60</fastjson-version>
-        <jackson-version>2.9.9</jackson-version>
+        <jackson-version>2.13.4.1</jackson-version>
         <jsqlparser-version>1.2</jsqlparser-version>
         <junit-version>4.12</junit-version>
         <poi-version>3.16</poi-version>

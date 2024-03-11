@@ -21,8 +21,8 @@ public class DalConnectionTest {
 
     {
         properties.setProperty(USER_NAME, "root");
-        properties.setProperty(PASSWORD, "!QAZ@WSX1qaz2wsx");
-        properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.117:3306/llj_test");
+        properties.setProperty(PASSWORD, "");
+        properties.setProperty(CONNECTION_URL, "jdbc:mysql://localhost:3306/llj_test");
         properties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure configure = new DataSourceConfigure("DalService2DB_w", properties);
         try {
@@ -65,9 +65,9 @@ public class DalConnectionTest {
 //    @Test
     public void testDiscardConnection() throws SQLException {
         Properties p = new Properties();
-        p.setProperty(USER_NAME, "tt_daltest_3");
-        p.setProperty(PASSWORD, "R0NeM30TcbAfWz7aHoWx");
-        p.setProperty(CONNECTION_URL, "jdbc:mysql://10.2.22.223:55777/dalservice2db?useUnicode=true&characterEncoding=UTF-8");
+        p.setProperty(USER_NAME, "root");
+        p.setProperty(PASSWORD, "");
+        p.setProperty(CONNECTION_URL, "jdbc:mysql://localhost:3306/dalservice2db?useUnicode=true&characterEncoding=UTF-8");
         p.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure c = new DataSourceConfigure("dalservice2db", p);
         RefreshableDataSource ds = new RefreshableDataSource("dalservice2db", c);

@@ -23,7 +23,7 @@
         <commons-lang-version>2.5</commons-lang-version>
         <junit-version>4.12</junit-version>
         <easymock-version>2.3</easymock-version>
-        <spring-version>4.3.8.RELEASE</spring-version>
+        <spring-version>5.2.21.RELEASE</spring-version>
         <cglib-nodep-version>2.1_3</cglib-nodep-version>
         <file_encoding>UTF-8</file_encoding>
         <jackson-version>2.9.10</jackson-version>
